@@ -5,17 +5,27 @@ $On Game Init:
 
 RadarIcon = {}
 
-function RadarIcon:Load()
-	self.ShipIconClasses = {}
-	self.WeaponIconClasses = {}
-	self.GenericIconClasses = {}
-	
+function RadarIcon:GameLoad()
 	if cf.fileExists("radaricon.cfg","data/config",true) then
 		self.Config = axemParse:ReadJSON("radaricon.cfg")
 	else
 		ba.error("RadarIcon: Config file missing! Cannot proceed!\n")
 		return
 	end
+
+	mn.LuaSEXPs["lua-radaricon-activate"].Action = function(...) RadarIcon:Enable(...) end
+
+	mn.LuaSEXPs["lua-radaricon-deactivate"].Action = function() RadarIcon:Disable() end
+
+	if type(self.Config.ToggleKeybind) == "string" then
+		io.Keybinding[self.Config.ToggleKeybind].registerHook(function() RadarIcon:ToggleOnOff() end, true)
+	end
+end
+
+function RadarIcon:Load()
+	self.ShipIconClasses = {}
+	self.WeaponIconClasses = {}
+	self.GenericIconClasses = {}
 	
 	self.Scalings = self.Config.Scale
 	self.CenterX = gr.getScreenWidth() / 2
@@ -370,6 +380,20 @@ function RadarIcon:LoadShips()
 	end
 end
 
+function RadarIcon:ToggleOnOff()
+	if self.Enabled then
+		self.Enabled = false
+	elseif next(self.Teams) ~= nil then --Assume that if no team can have icons, radaricons was probably disabled by SEXP or not even enabled at all, so prevent any toggle here.
+		self.Enabled = true
+
+		--Force a reload of currently present things that need an icon
+		self.ShipIcons = {}
+		self.WeaponIcons = {}
+		RadarIcon:LoadShips()
+	end
+
+end
+
 function RadarIcon:Enable(...)
 	self.Enabled = true
 	
@@ -381,11 +405,11 @@ function RadarIcon:Enable(...)
 end 
 
 function RadarIcon:Disable()
-	RadarIcon.Enabled = false
-	RadarIcon.ShipIcons = {}
-	RadarIcon.WeaponIcons = {}
-	RadarIcon.Teams = {}
-	RadarIcon.ColorCache = {}
+	self.Enabled = false
+	self.ShipIcons = {}
+	self.WeaponIcons = {}
+	self.Teams = {}
+	self.ColorCache = {}
 end
 
 -----------------------------
@@ -568,9 +592,7 @@ function RadarIcon:Draw()
 	end
 end
 
-mn.LuaSEXPs["lua-radaricon-activate"].Action = function(...) RadarIcon:Enable(...) end
-
-mn.LuaSEXPs["lua-radaricon-deactivate"].Action = function() RadarIcon:Disable() end
+RadarIcon:GameLoad()
 
 ]
 

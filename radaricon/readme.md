@@ -31,4 +31,6 @@ The ``Merge`` settings define whether three or more icons of the same type merge
 The ``Active`` subproperty activates the merge system. ``First`` defines how close two icons need to be (in relation to their size) to be considered an icon group. ``Subsequent`` defines the distance of an icon to an icon group under which the icon is considered part of the group.
 Icons are only grouped, when their corresponding ship is at least ``Near`` distance away from the player.
 
+``ToggleKeybind`` can be used to specify a rebindable keybind (such as "CUSTOM_CONTROL_1") which toggles the radaricons on or off during gameplay. Note that disabling the radaricons by SEXP or not enabling them at all for a mission will supercede this toggle. If no toggle is desired, set to ``false``.
+
 The RadarIcon-Script uses Axems AxemParse module (though in reduced form, so if you depend on AxemParse, use your version!) for the config, and Svedalrain's radar icons. Further thanks to Mito and EatThePath for testing and bugfixing.
